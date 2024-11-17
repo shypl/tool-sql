@@ -197,6 +197,13 @@ inline fun DataSource.getOrPutGeneratedKeyInt(
 	return connection { getOrPutGeneratedKeyInt(get, getSetup, put, putSetup) }
 }
 
+inline fun DataSource.getOrPutGeneratedKeyLong(
+	@Language("SQL") get: String, getSetup: AddablePreparedStatement.() -> Unit,
+	@Language("SQL") put: String, putSetup: AddablePreparedStatement.() -> Unit,
+): Long {
+	return connection { getOrPutGeneratedKeyLong(get, getSetup, put, putSetup) }
+}
+
 ///
 
 fun DataSource.fetchInt(@Language("SQL") sql: String): Int {

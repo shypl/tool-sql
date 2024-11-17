@@ -364,19 +364,61 @@ inline fun Connection.getOrPutGeneratedKeyInt(
 	@Language("SQL") get: String, getSetup: AddablePreparedStatement.() -> Unit,
 	@Language("SQL") put: String, putSetup: AddablePreparedStatement.() -> Unit,
 ): Int {
-	prepareAddableStatement(get).use { select ->
-		select.getSetup()
-		select.executeQuery().use {
-			if (it.next()) return it.getInt(1)
-		}
-		
-		return updateAndGetGeneratedKeyIntOrElse(put, putSetup) {
+	transaction {
+		prepareAddableStatement(get).use { select ->
+			select.getSetup()
 			select.executeQuery().use {
-				if (it.next()) it.getInt(1)
-				else throw SQLException("Couldn't get or put a key")
+				if (it.next()) return it.getInt(1)
+			}
+			
+			try {
+				return updateAndGetGeneratedKeyIntOrElse(put, putSetup) {
+					select.executeQuery().use {
+						if (it.next()) return it.getInt(1)
+						throw SQLException("Couldn't get or put a key")
+					}
+				}
+			}
+			catch (e: SQLException) {
+				if (e.errorCode == 1062) { // Duplicate entry
+					select.executeQuery().use {
+						if (it.next()) return it.getInt(1)
+					}
+				}
+				throw SQLException("Couldn't get or put a key", e)
 			}
 		}
-		
+	}
+}
+
+inline fun Connection.getOrPutGeneratedKeyLong(
+	@Language("SQL") get: String, getSetup: AddablePreparedStatement.() -> Unit,
+	@Language("SQL") put: String, putSetup: AddablePreparedStatement.() -> Unit,
+): Long {
+	transaction {
+		prepareAddableStatement(get).use { select ->
+			select.getSetup()
+			select.executeQuery().use {
+				if (it.next()) return it.getLong(1)
+			}
+			
+			try {
+				return updateAndGetGeneratedKeyLongOrElse(put, putSetup) {
+					select.executeQuery().use {
+						if (it.next()) return it.getLong(1)
+						throw SQLException("Couldn't get or put a key")
+					}
+				}
+			}
+			catch (e: SQLException) {
+				if (e.errorCode == 1062) { // Duplicate entry
+					select.executeQuery().use {
+						if (it.next()) return it.getLong(1)
+					}
+				}
+				throw SQLException("Couldn't get or put a key", e)
+			}
+		}
 	}
 }
 
