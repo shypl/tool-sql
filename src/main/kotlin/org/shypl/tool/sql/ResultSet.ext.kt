@@ -1,7 +1,9 @@
 package org.shypl.tool.sql
 
 import java.sql.ResultSet
+import java.time.Clock
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 inline fun ResultSet.forNext(action: (ResultSet) -> Unit): Boolean {
 	return if (next()) {
@@ -22,13 +24,20 @@ inline fun <E> ResultSet.ofNext(action: ResultSet.() -> E): E? {
 }
 
 
-
 fun ResultSet.getLocalDateTime(columnIndex: Int): LocalDateTime? {
 	return getTimestamp(columnIndex)?.toLocalDateTime()
 }
 
 fun ResultSet.getLocalDateTime(columnLabel: String): LocalDateTime? {
 	return getTimestamp(columnLabel)?.toLocalDateTime()
+}
+
+fun ResultSet.getZonedDateTime(columnIndex: Int, clock: Clock): ZonedDateTime? {
+	return getTimestamp(columnIndex)?.toLocalDateTime()?.atZone(clock.zone)
+}
+
+fun ResultSet.getZonedDateTime(columnLabel: String, clock: Clock): ZonedDateTime? {
+	return getTimestamp(columnLabel)?.toLocalDateTime()?.atZone(clock.zone)
 }
 
 

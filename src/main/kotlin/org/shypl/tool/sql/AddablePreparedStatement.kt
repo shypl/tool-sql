@@ -8,6 +8,7 @@ import java.sql.*
 import java.sql.Array
 import java.sql.Date
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.*
 
 interface AddablePreparedStatement : PreparedStatement {
@@ -16,6 +17,8 @@ interface AddablePreparedStatement : PreparedStatement {
 	fun resetIndex()
 	
 	fun addLocalDateTime(x: LocalDateTime?)
+	
+	fun addZonedDateTime(x: ZonedDateTime?)
 	
 	fun addEnum(x: Enum<*>?)
 	
